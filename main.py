@@ -24,6 +24,11 @@ def button(message):
 	markup.add(button_add_score, button_list_awards, button_add_award, button_info)
 	bot.send_message(message.chat.id, "Howdy, how are you doing?", reply_markup=markup)
 
+@bot.callback_query_handler(func=lambda call:True)
+def callback(call):
+	if call.message:
+		if call.data=='button_list_awards':
+			bot.send_message(call.message.chat.id, 'Тест')
 
 
 bot.infinity_polling()
