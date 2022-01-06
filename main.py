@@ -4,7 +4,7 @@ import telebot
 import os
 import sqlite3
 
-db = sqlite3.connect("bot_database.db")
+# db = sqlite3.connect("bot_database.db")
 
 
 token = os.environ['motivate_bot_token']
@@ -15,10 +15,22 @@ bot = telebot.TeleBot(token)
 # cursor.execute(sql)
 
 def get_coins(id):
-    sql = f"SELECT coins FROM users WHERE user_id={id}"
+    db = sqlite3.connect("bot_database.db")
+    # sql = f"SELECT coins FROM users WHERE user_id={id}"
+    sql = "SELECT coins FROM users"
     cursor = db.cursor()
     cursor.execute(sql)
-    return cursor.fetchall()
+    print(cursor.fetchall())
+    return cursor.fetchall() or 'anus'
+
+def add_coins(id):
+    db = sqlite3.connect("bot_database.db")
+    cursor = db.cursor()
+    sql = "INSERT INTO users(user_id, coins) VALUES ('603970011', 1)"
+    cursor.execute(sql)
+    db.commit()
+    print(cursor.fetchall())
+    return cursor.fetchall() or 'hmmm'
 
 @bot.message_handler(commands=['start'])
 def button(message):
@@ -38,7 +50,7 @@ def callback(call):
             print(call.message.chat.id)
             bot.send_message(call.message.chat.id, get_coins(call.message.chat.id))
         elif call.data == 'button_add_score':
-            bot.send_message(call.message.chat.id, 'coin added')
+            bot.send_message(call.message.chat.id, add_coins(call.message.chat.id))
 
 
 
