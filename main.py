@@ -7,6 +7,7 @@ import sqlite3
 token = os.environ['motivate_bot_token']
 bot = telebot.TeleBot(token)
 
+instruction = 'Информация'
 
 def get_coins(id):
     db = sqlite3.connect("bot_database.db")
@@ -27,8 +28,16 @@ def add_coins(id, coin):
         sql = f"UPDATE users SET coins=coins+{coin} WHERE user_id = {id};"
         cursor.execute(sql)
         db.commit()
-        break
+        return f"Добавлено {coin} балла"
 
+def reset_coins(id):
+    db = sqlite3.connect("bot_database.db")
+    cursor = db.cursor()
+    sql = f"UPDATE users SET coins=0 WHERE user_id = {id};"
+    cursor = db.cursor()
+    cursor.execute(sql)
+    db.commit()
+    return "Баллы сброшены"
 
 @bot.message_handler(commands=['start'])
 def button(message):
@@ -61,20 +70,24 @@ def callback(call):
             bot.edit_message_text(text='тест', chat_id=call.message.chat.id, message_id=call.message.message_id)
         elif call.data == 'button_add_1':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 1))
-            bot.send_message(call.message.chat.id, f"Добавлен 1 балл")
         elif call.data == 'button_add_2':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 2))
-            bot.send_message(call.message.chat.id, f"Добавлено 2 балла")
         elif call.data == 'button_add_3':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 3))
-            bot.send_message(call.message.chat.id, f"Добавлено 3 балла")
         elif call.data == 'button_add_4':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 4))
-            bot.send_message(call.message.chat.id, f"Добавлено 4 балла")
         elif call.data == 'button_add_5':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 5))
-            bot.send_message(call.message.chat.id, f"Добавлено 5 балла")
         elif call.data == 'back_to_menu':
             button(call.message)
+        elif call.data == 'button_info':
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+            menu = telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu')
+            button_reset = telebot.types.InlineKeyboardButton('Сбросить баллы', callback_data='button_reset')
+            markup.add(menu, button_reset)
+            bot.send_message(call.message.chat.id, instruction, reply_markup=markup)
+        elif call.data == 'button_reset':
+            bot.send_message(call.message.chat.id, reset_coins(call.message.chat.id))
+
 
 bot.infinity_polling()
