@@ -39,17 +39,16 @@ def button(message):
     button_add_award = telebot.types.InlineKeyboardButton('Добавить награду', callback_data='button_add_award')
     button_info = telebot.types.InlineKeyboardButton('Инфо', callback_data='button_info')
     markup.add(button_add_score, button_list_awards, button_add_award, button_info)
-    bot.send_message(message.chat.id, "Главное меню", reply_markup=markup)
+    bot.send_message(message.chat.id, f"Главное меню \nВ наличии {get_coins(message.chat.id)} баллов", reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback(call):
     if call.message:
-        if call.data == 'button_list_awards':
-            print(call.message.chat.id)
-            bot.send_message(call.message.chat.id, get_coins(call.message.chat.id))
-        elif call.data == 'button_add_score':
+        if call.data == 'button_add_score':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id))
+        elif call.data == 'button_list_awards':
+            pass
 
 
 bot.infinity_polling()
