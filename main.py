@@ -9,6 +9,7 @@ bot = telebot.TeleBot(token)
 
 instruction = 'Информация'
 
+
 def get_coins(id):
     db = sqlite3.connect("bot_database.db")
     sql = f"SELECT coins FROM users WHERE user_id={id}"
@@ -30,6 +31,11 @@ def add_coins(id, coin):
         db.commit()
         return f"Добавлено {coin} балла"
 
+
+def add_reward(name, cost):
+    pass
+
+
 def reset_coins(id):
     db = sqlite3.connect("bot_database.db")
     cursor = db.cursor()
@@ -38,6 +44,7 @@ def reset_coins(id):
     cursor.execute(sql)
     db.commit()
     return "Баллы сброшены"
+
 
 @bot.message_handler(commands=['start'])
 def button(message):
@@ -49,6 +56,11 @@ def button(message):
     markup.add(button_add_score, button_list_awards, button_add_award, button_info)
     bot.send_message(message.chat.id, f"Главное меню \nВ наличии {get_coins(message.chat.id)} баллов",
                      reply_markup=markup)
+
+
+@bot.message_handler(content_types=['text'])
+def handle_text(message):
+    text = (message.text)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -67,7 +79,15 @@ def callback(call):
             bot.send_message(call.message.chat.id, f"Главное меню \nВ наличии {get_coins(call.message.chat.id)} баллов",
                              reply_markup=markup)
         elif call.data == 'button_list_awards':
-            bot.edit_message_text(text='тест', chat_id=call.message.chat.id, message_id=call.message.message_id)
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+            choose_button = telebot.types.InlineKeyboardButton('Выбрать награду', callback_data='choose_reward')
+            add_reward_button = telebot.types.InlineKeyboardButton('Добавить награду', callback_data='add_reward')
+            menu = telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu')
+            markup.add(choose_button, add_reward_button, menu)
+            bot.send_message(call.message.chat.id, f"Меню наград",
+                             reply_markup=markup)
+        elif call.data == 'add_reward':
+            bot.send_message(call.message.chat.id, call.message.text)
         elif call.data == 'button_add_1':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 1))
         elif call.data == 'button_add_2':
