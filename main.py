@@ -48,10 +48,11 @@ def register_cost_reward(message, reward_object_name):
         return
     reward_object_cost = int(message.text)
     print(reward_object_name, reward_object_cost)
-    # db = sqlite3.connect("bot_database.db")
-    # sql = f"SELECT coins FROM users WHERE user_id={message.chat.id}" #добавить запрос записи в таблицу наград
-    # cursor = db.cursor()
-    # cursor.execute(sql)
+    db = sqlite3.connect("bot_database.db")
+    sql = f"UPDATE rewards SET reward_name={reward_object_name}, reward_cost={reward_object_cost} WHERE user_id = {message.chat.id};" #добавить запрос записи в таблицу наград
+    cursor = db.cursor()
+    cursor.execute(sql)
+    db.commit()
 
 
 def reset_coins(id):
