@@ -36,6 +36,17 @@ def add_reward(name, cost):
     pass
 
 
+def test(message):
+    reward_object_name = message.text
+    message = bot.send_message(message.chat.id, "Введи стоимость награды")
+    bot.register_next_step_handler(message, test2, reward_object_name)
+
+
+def test2(message, reward_object_name):
+    reward_object_cost = int(message.text)
+    print(reward_object_name, reward_object_cost)
+
+
 def reset_coins(id):
     db = sqlite3.connect("bot_database.db")
     cursor = db.cursor()
@@ -87,7 +98,8 @@ def callback(call):
             bot.send_message(call.message.chat.id, f"Меню наград",
                              reply_markup=markup)
         elif call.data == 'add_reward':
-            bot.send_message(call.message.chat.id, call.message.text)
+            message = bot.send_message(call.message.chat.id, "Введи название награды")
+            bot.register_next_step_handler(message, test)  # сделать функцию для добавления в базу данных
         elif call.data == 'button_add_1':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 1))
         elif call.data == 'button_add_2':
