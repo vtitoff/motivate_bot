@@ -1,9 +1,13 @@
-# import requests as r
 # import main
 import os
+import sqlite3
+import time
 
-#
-# token = main.token
-# url = f'https://api.telegram.org/bot{token}/getMe'
-# print(r.get(url=url).json())
-print(os.environ["motivate_bot_token"])
+# print(os.environ["motivate_bot_token"])
+
+db = sqlite3.connect("bot_database.db")
+sql = f"SELECT * FROM rewards"
+cursor = db.cursor()
+cursor.execute(sql)
+s=cursor.fetchall()
+print(s)

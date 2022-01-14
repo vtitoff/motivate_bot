@@ -9,3 +9,13 @@ CREATE TABLE users (
 );
 ''')
 db.commit()
+
+
+db.execute('''
+CREATE TABLE rewards (
+    user_id TEXT PRIMARY KEY,
+    reward_name TEXT
+    reward_cost INTEGER
+);
+''')
+db.commit()

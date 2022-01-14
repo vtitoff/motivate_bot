@@ -21,7 +21,6 @@ def get_coins(id):
 
 def add_coins(id, coin):
     db = sqlite3.connect("bot_database.db")
-    cursor = db.cursor()
     sql = f"SELECT coins FROM users WHERE user_id={id}"
     cursor = db.cursor()
     cursor.execute(sql)
@@ -36,20 +35,27 @@ def add_reward(name, cost):
     pass
 
 
-def test(message):
+def register_new_reward(message):
     reward_object_name = message.text
-    message = bot.send_message(message.chat.id, "Введи стоимость награды")
-    bot.register_next_step_handler(message, test2, reward_object_name)
+    bot.send_message(message.chat.id, "Введи стоимость награды")
+    # написать проверку на число
+    bot.register_next_step_handler(message, register_cost_reward, reward_object_name)
 
 
-def test2(message, reward_object_name):
+def register_cost_reward(message, reward_object_name):
+    if not message.text.isdigit():
+        bot.send_message(message.chat.id, "Что-то не так, попробуй добавить награду заново")
+        return
     reward_object_cost = int(message.text)
     print(reward_object_name, reward_object_cost)
+    # db = sqlite3.connect("bot_database.db")
+    # sql = f"SELECT coins FROM users WHERE user_id={message.chat.id}" #добавить запрос записи в таблицу наград
+    # cursor = db.cursor()
+    # cursor.execute(sql)
 
 
 def reset_coins(id):
     db = sqlite3.connect("bot_database.db")
-    cursor = db.cursor()
     sql = f"UPDATE users SET coins=0 WHERE user_id = {id};"
     cursor = db.cursor()
     cursor.execute(sql)
@@ -67,11 +73,6 @@ def button(message):
     markup.add(button_add_score, button_list_awards, button_add_award, button_info)
     bot.send_message(message.chat.id, f"Главное меню \nВ наличии {get_coins(message.chat.id)} баллов",
                      reply_markup=markup)
-
-
-@bot.message_handler(content_types=['text'])
-def handle_text(message):
-    text = (message.text)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -99,7 +100,7 @@ def callback(call):
                              reply_markup=markup)
         elif call.data == 'add_reward':
             message = bot.send_message(call.message.chat.id, "Введи название награды")
-            bot.register_next_step_handler(message, test)  # сделать функцию для добавления в базу данных
+            bot.register_next_step_handler(message, register_new_reward)  # сделать функцию для добавления в базу данных
         elif call.data == 'button_add_1':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 1))
         elif call.data == 'button_add_2':
