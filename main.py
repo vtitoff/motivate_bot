@@ -71,9 +71,8 @@ def button(message):
     markup = telebot.types.InlineKeyboardMarkup(row_width=2)
     button_add_score = telebot.types.InlineKeyboardButton('Добавить баллы', callback_data='button_add_score')
     button_list_awards = telebot.types.InlineKeyboardButton('Список наград', callback_data='button_list_awards')
-    button_add_award = telebot.types.InlineKeyboardButton('Добавить награду', callback_data='button_add_award')
     button_info = telebot.types.InlineKeyboardButton('Инфо', callback_data='button_info')
-    markup.add(button_add_score, button_list_awards, button_add_award, button_info)
+    markup.add(button_add_score, button_list_awards, button_info)
     bot.send_message(message.chat.id, f"Главное меню \nВ наличии {get_coins(message.chat.id)} баллов",
                      reply_markup=markup)
 
