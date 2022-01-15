@@ -47,9 +47,11 @@ def register_cost_reward(message, reward_object_name):
         bot.send_message(message.chat.id, "Что-то не так, попробуй добавить награду заново")
         return
     reward_object_cost = int(message.text)
-    print(reward_object_name, reward_object_cost)
+    print(message.chat.id)
+    print(f'{reward_object_name=} {reward_object_cost=}')
     db = sqlite3.connect("bot_database.db")
-    sql = f"UPDATE rewards SET reward_name={reward_object_name}, reward_cost={reward_object_cost} WHERE user_id = {message.chat.id};" #добавить запрос записи в таблицу наград
+    # sql = f"UPDATE rewards SET reward_name='{reward_object_name}', reward_cost={reward_object_cost} WHERE user_id = {message.chat.id};" #добавить запрос записи в таблицу наград
+    sql = f"INSERT INTO rewards (user_id, reward_name, reward_cost) VALUES ({message.chat.id}, '{reward_object_name}', {reward_object_cost})"  # добавить запрос записи в таблицу наград
     cursor = db.cursor()
     cursor.execute(sql)
     db.commit()

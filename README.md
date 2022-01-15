@@ -13,9 +13,15 @@ db.commit()
 
 db.execute('''
 CREATE TABLE rewards (
-    user_id TEXT PRIMARY KEY,
+    reward_id PRIMARY KEY
+    user_id TEXT,
     reward_name TEXT
     reward_cost INTEGER
 );
 ''')
 db.commit()
+
+
+
+>>> import uuid
+>>> str(uuid.uuid4()).replace('-','')
