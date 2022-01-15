@@ -22,12 +22,12 @@ def get_coins(id):
 
 def add_coins(id, coin):
     db = sqlite3.connect("bot_database.db")
-    sql = f"SELECT coins FROM users WHERE user_id={id}"
+    sql = f"SELECT coins FROM users WHERE user_id=?"
     cursor = db.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql, id)
     for x in cursor.fetchone():
-        sql = f"UPDATE users SET coins=coins+{coin} WHERE user_id = {id};"
-        cursor.execute(sql)
+        sql = "UPDATE users SET coins=coins+? WHERE user_id=?;"
+        cursor.execute(sql, (coin, id))
         db.commit()
         return f"Добавлено {coin} балла"
 
@@ -51,7 +51,7 @@ def register_cost_reward(message, reward_object_name):
     print(message.chat.id)
     print(f'{reward_object_name=} {reward_object_cost=}')
     db = sqlite3.connect("bot_database.db")
-    sql = f"INSERT INTO rewards (reward_id, reward_name, reward_cost, user_id) VALUES (?, ?, ?, ?)"  # добавить запрос записи в таблицу наград
+    sql = f"INSERT INTO rewards (reward_id, reward_name, reward_cost, user_id) VALUES (?, ?, ?, ?)"
     cursor = db.cursor()
     cursor.execute(sql, (str(uuid.uuid4()).replace('-',''), reward_object_name, reward_object_cost, message.chat.id))
     db.commit()
@@ -59,9 +59,9 @@ def register_cost_reward(message, reward_object_name):
 
 def reset_coins(id):
     db = sqlite3.connect("bot_database.db")
-    sql = f"UPDATE users SET coins=0 WHERE user_id = {id};"
+    sql = f"UPDATE users SET coins=0 WHERE user_id = ?;"
     cursor = db.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql, id)
     db.commit()
     return "Баллы сброшены"
 
