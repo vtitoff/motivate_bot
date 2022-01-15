@@ -3,6 +3,7 @@ import json
 import telebot
 import os
 import sqlite3
+import uuid
 
 token = os.environ['motivate_bot_token']
 bot = telebot.TeleBot(token)
@@ -50,10 +51,9 @@ def register_cost_reward(message, reward_object_name):
     print(message.chat.id)
     print(f'{reward_object_name=} {reward_object_cost=}')
     db = sqlite3.connect("bot_database.db")
-    # sql = f"UPDATE rewards SET reward_name='{reward_object_name}', reward_cost={reward_object_cost} WHERE user_id = {message.chat.id};" #добавить запрос записи в таблицу наград
-    sql = f"INSERT INTO rewards (user_id, reward_name, reward_cost) VALUES ({message.chat.id}, '{reward_object_name}', {reward_object_cost})"  # добавить запрос записи в таблицу наград
+    sql = f"INSERT INTO rewards (reward_id, reward_name, reward_cost, user_id) VALUES (?, ?, ?, ?)"  # добавить запрос записи в таблицу наград
     cursor = db.cursor()
-    cursor.execute(sql)
+    cursor.execute(sql, (str(uuid.uuid4()).replace('-',''), reward_object_name, reward_object_cost, message.chat.id))
     db.commit()
 
 
