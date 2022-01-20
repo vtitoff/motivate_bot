@@ -53,7 +53,7 @@ def register_cost_reward(message, reward_object_name):
     db = sqlite3.connect("bot_database.db")
     sql = f"INSERT INTO rewards (reward_id, reward_name, reward_cost, user_id) VALUES (?, ?, ?, ?)"
     cursor = db.cursor()
-    cursor.execute(sql, (str(uuid.uuid4()).replace('-',''), reward_object_name, reward_object_cost, message.chat.id))
+    cursor.execute(sql, (str(uuid.uuid4()).replace('-', ''), reward_object_name, reward_object_cost, message.chat.id))
     db.commit()
 
 
@@ -123,6 +123,15 @@ def callback(call):
             bot.send_message(call.message.chat.id, instruction, reply_markup=markup)
         elif call.data == 'button_reset':
             bot.send_message(call.message.chat.id, reset_coins(call.message.chat.id))
+        elif call.data == 'choose_reward':
+            print('choose_reward')
+            db = sqlite3.connect("bot_database.db")
+            sql = f"SELECT reward_name, reward_cost FROM rewards WHERE user_id={call.message.chat.id}"
+            cursor = db.cursor()
+            cursor.execute(sql)
+            for i, j in cursor.fetchall():
+                bot.send_message(call.message.chat.id, f'{i} - {j}')
+                print(f'{i} - {j}')
 
 
 bot.infinity_polling()
