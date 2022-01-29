@@ -102,7 +102,7 @@ def callback(call):
                              reply_markup=markup)
         elif call.data == 'add_reward':
             message = bot.send_message(call.message.chat.id, "Введи название награды")
-            bot.register_next_step_handler(message, register_new_reward)  # сделать функцию для добавления в базу данных
+            bot.register_next_step_handler(message, register_new_reward)
         elif call.data == 'button_add_1':
             bot.send_message(call.message.chat.id, add_coins(call.message.chat.id, 1))
         elif call.data == 'button_add_2':
@@ -129,12 +129,14 @@ def callback(call):
             sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(call.message.chat.id)
             cursor = db.cursor()
             cursor.execute(sql)
-            id_reward = 0
-            reward_massive = ''
+            button_id = 0
+            # for i, j in cursor.fetchall():
+            #     reward_massive += f'\n{i} - {j}'
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2)
             for i, j in cursor.fetchall():
-                id_reward += 1
-                reward_massive += f'\n{id_reward} {i} - {j}'
-            bot.send_message(call.message.chat.id, reward_massive)
+                button_id+=1
+                markup.add(telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button {button_id}'))
+            bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
 
 
 bot.infinity_polling()
