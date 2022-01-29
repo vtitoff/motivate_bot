@@ -11,6 +11,13 @@ bot = telebot.TeleBot(token)
 instruction = 'Информация'
 
 
+class Rewards_List():
+    dict_rewards = {}
+
+
+reward_list = Rewards_List()
+
+
 def get_coins(id):
     db = sqlite3.connect("bot_database.db")
     sql = "SELECT coins FROM users WHERE user_id={}".format(id)
@@ -26,7 +33,7 @@ def add_coins(id, coin):
     cursor = db.cursor()
     cursor.execute(sql, id)
     for x in cursor.fetchone():
-        sql = "UPDATE users SET coins=coins+? WHERE user_id=?;"
+        sql = "UPDATE users SET coins=coins+? WHERE user_id=?"
         cursor.execute(sql, (coin, id))
         db.commit()
         return f"Добавлено {coin} балла"
@@ -123,6 +130,14 @@ def callback(call):
             bot.send_message(call.message.chat.id, instruction, reply_markup=markup)
         elif call.data == 'button_reset':
             bot.send_message(call.message.chat.id, reset_coins(call.message.chat.id))
+        elif call.data in reward_list.dict_rewards:
+            print(reward_list.dict_rewards[call.data])
+            db = sqlite3.connect("bot_database.db")
+            sql = "UPDATE users SET coins=coins-{} WHERE user_id={}".format(reward_list.dict_rewards[call.data],
+                                                                            call.message.chat.id)
+            cursor = db.cursor()
+            cursor.execute(sql)
+            db.commit()
         elif call.data == 'choose_reward':
             print('choose_reward')
             db = sqlite3.connect("bot_database.db")
@@ -130,12 +145,11 @@ def callback(call):
             cursor = db.cursor()
             cursor.execute(sql)
             button_id = 0
-            # for i, j in cursor.fetchall():
-            #     reward_massive += f'\n{i} - {j}'
             markup = telebot.types.InlineKeyboardMarkup(row_width=2)
             for i, j in cursor.fetchall():
-                button_id+=1
+                button_id += 1
                 markup.add(telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button {button_id}'))
+                reward_list.dict_rewards[f'button {button_id}'] = j
             bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
 
 
