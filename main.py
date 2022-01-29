@@ -13,7 +13,7 @@ instruction = 'Информация'
 
 def get_coins(id):
     db = sqlite3.connect("bot_database.db")
-    sql = f"SELECT coins FROM users WHERE user_id={id}"
+    sql = "SELECT coins FROM users WHERE user_id={}".format(id)
     cursor = db.cursor()
     cursor.execute(sql)
     for x in cursor.fetchone():
@@ -126,12 +126,15 @@ def callback(call):
         elif call.data == 'choose_reward':
             print('choose_reward')
             db = sqlite3.connect("bot_database.db")
-            sql = f"SELECT reward_name, reward_cost FROM rewards WHERE user_id={call.message.chat.id}"
+            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(call.message.chat.id)
             cursor = db.cursor()
             cursor.execute(sql)
+            id_reward = 0
+            reward_massive = ''
             for i, j in cursor.fetchall():
-                bot.send_message(call.message.chat.id, f'{i} - {j}')
-                print(f'{i} - {j}')
+                id_reward += 1
+                reward_massive += f'\n{id_reward} {i} - {j}'
+            bot.send_message(call.message.chat.id, reward_massive)
 
 
 bot.infinity_polling()
