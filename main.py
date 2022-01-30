@@ -13,6 +13,7 @@ instruction = 'Информация'
 
 class Rewards_List():
     dict_rewards = {}
+    dict_del_rewards = {}
 
 
 reward_list = Rewards_List()
@@ -29,12 +30,12 @@ def get_coins(id):
 
 def add_coins(id, coin):
     db = sqlite3.connect("bot_database.db")
-    sql = f"SELECT coins FROM users WHERE user_id=?"
+    sql = "SELECT coins FROM users WHERE user_id={}".format(id)
     cursor = db.cursor()
-    cursor.execute(sql, id)
+    cursor.execute(sql)
     for x in cursor.fetchone():
-        sql = "UPDATE users SET coins=coins+? WHERE user_id=?"
-        cursor.execute(sql, (coin, id))
+        sql = "UPDATE users SET coins=coins+{} WHERE user_id={}".format(coin, id)
+        cursor.execute(sql)
         db.commit()
         return f"Добавлено {coin} балла"
 
@@ -66,9 +67,9 @@ def register_cost_reward(message, reward_object_name):
 
 def reset_coins(id):
     db = sqlite3.connect("bot_database.db")
-    sql = f"UPDATE users SET coins=0 WHERE user_id = ?;"
+    sql = "UPDATE users SET coins=0 WHERE user_id = {};".format(id)
     cursor = db.cursor()
-    cursor.execute(sql, id)
+    cursor.execute(sql)
     db.commit()
     return "Баллы сброшены"
 
@@ -103,8 +104,9 @@ def callback(call):
             markup = telebot.types.InlineKeyboardMarkup(row_width=2)
             choose_button = telebot.types.InlineKeyboardButton('Выбрать награду', callback_data='choose_reward')
             add_reward_button = telebot.types.InlineKeyboardButton('Добавить награду', callback_data='add_reward')
+            delete_reward_button = telebot.types.InlineKeyboardButton('Убрать награду', callback_data='del_reward')
             menu = telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu')
-            markup.add(choose_button, add_reward_button, menu)
+            markup.add(choose_button, add_reward_button, delete_reward_button, menu)
             bot.send_message(call.message.chat.id, f"Меню наград",
                              reply_markup=markup)
         elif call.data == 'add_reward':
@@ -138,6 +140,13 @@ def callback(call):
             cursor = db.cursor()
             cursor.execute(sql)
             db.commit()
+        elif call.data in reward_list.dict_del_rewards:
+            db = sqlite3.connect("bot_database.db")
+            sql = "DELETE from rewards WHERE reward_name={} and user_id={}".format(
+                reward_list.dict_del_rewards[call.data], call.message.chat.id)
+            cursor = db.cursor()
+            cursor.execute(sql)
+            db.commit()
         elif call.data == 'choose_reward':
             print('choose_reward')
             db = sqlite3.connect("bot_database.db")
@@ -150,6 +159,19 @@ def callback(call):
                 button_id += 1
                 markup.add(telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button {button_id}'))
                 reward_list.dict_rewards[f'button {button_id}'] = j
+            bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
+        elif call.data == 'del_reward':
+            db = sqlite3.connect("bot_database.db")
+            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(call.message.chat.id)
+            cursor = db.cursor()
+            cursor.execute(sql)
+            button_id = 0
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+            for i, j in cursor.fetchall():
+                button_id += 1
+                markup.add(
+                    telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button_del {button_id}'))
+                reward_list.dict_del_rewards[f'button_del {button_id}'] = j
             bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
 
 
