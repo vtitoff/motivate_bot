@@ -160,6 +160,7 @@ def callback(call):
                 button_id += 1
                 markup.add(telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button {button_id}'))
                 reward_list.dict_rewards[f'button {button_id}'] = j
+            markup.add(telebot.types.InlineKeyboardButton('Назад', callback_data='back_to_menu'))
             bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
         elif call.data == 'del_reward':
             db = sqlite3.connect("bot_database.db")
@@ -173,6 +174,7 @@ def callback(call):
                 markup.add(
                     telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button_del {button_id}'))
                 reward_list.dict_del_rewards[f'button_del {button_id}'] = i
+                markup.add(telebot.types.InlineKeyboardButton('Назад', callback_data='back_to_menu'))
             bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
 
 
