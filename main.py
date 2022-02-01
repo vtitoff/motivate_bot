@@ -47,7 +47,7 @@ def add_reward(name, cost):
 def register_new_reward(message):
     reward_object_name = message.text
     bot.send_message(message.chat.id, "Введи стоимость награды")
-    # написать проверку на число
+    # TODO написать проверку на число
     bot.register_next_step_handler(message, register_cost_reward, reward_object_name)
 
 
@@ -56,13 +56,15 @@ def register_cost_reward(message, reward_object_name):
         bot.send_message(message.chat.id, "Что-то не так, попробуй добавить награду заново")
         return
     reward_object_cost = int(message.text)
-    print(message.chat.id)
-    print(f'{reward_object_name=} {reward_object_cost=}')
     db = sqlite3.connect("bot_database.db")
     sql = f"INSERT INTO rewards (reward_id, reward_name, reward_cost, user_id) VALUES (?, ?, ?, ?)"
     cursor = db.cursor()
     cursor.execute(sql, (str(uuid.uuid4()).replace('-', ''), reward_object_name, reward_object_cost, message.chat.id))
     db.commit()
+    markup = telebot.types.InlineKeyboardMarkup(row_width=2).add(
+        telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu'))
+    bot.send_message(message.chat.id, text='Награда добавлена',
+                     reply_markup=markup)
 
 
 def reset_coins(id):
@@ -140,7 +142,6 @@ def callback(call):
             cursor = db.cursor()
             cursor.execute(sql)
             db.commit()
-            # TODO не выскакивает сообщение
             markup = telebot.types.InlineKeyboardMarkup(row_width=2).add(
                 telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu'))
             bot.send_message(call.message.chat.id,
