@@ -140,6 +140,12 @@ def callback(call):
             cursor = db.cursor()
             cursor.execute(sql)
             db.commit()
+            # TODO не выскакивает сообщение
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2).add(
+                telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu'))
+            bot.send_message(call.message.chat.id,
+                             text=f'Награда использована \nВ наличии {get_coins(call.message.chat.id)} баллов',
+                             reply_markup=markup)
         elif call.data in reward_list.dict_del_rewards:
             print(f'{reward_list.dict_del_rewards[call.data]=}')
             db = sqlite3.connect("bot_database.db")
@@ -148,6 +154,10 @@ def callback(call):
             cursor = db.cursor()
             cursor.execute(sql)
             db.commit()
+            markup = telebot.types.InlineKeyboardMarkup(row_width=2).add(
+                telebot.types.InlineKeyboardButton('Назад в меню', callback_data='back_to_menu'))
+            bot.send_message(call.message.chat.id, text='Награда убрана из списка',
+                             reply_markup=markup)
         elif call.data == 'choose_reward':
             print('choose_reward')
             db = sqlite3.connect("bot_database.db")
@@ -174,7 +184,7 @@ def callback(call):
                 markup.add(
                     telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button_del {button_id}'))
                 reward_list.dict_del_rewards[f'button_del {button_id}'] = i
-                markup.add(telebot.types.InlineKeyboardButton('Назад', callback_data='back_to_menu'))
+            markup.add(telebot.types.InlineKeyboardButton('Назад', callback_data='back_to_menu'))
             bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
 
 
