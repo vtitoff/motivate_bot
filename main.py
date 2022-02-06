@@ -161,8 +161,9 @@ def callback(call):
                              reply_markup=markup)
         elif call.data == 'choose_reward':
             print('choose_reward')
+            user_coins = get_coins(call.message.chat.id)
             db = sqlite3.connect("bot_database.db")
-            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(call.message.chat.id)
+            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={} AND reward_cost<={}".format(call.message.chat.id, user_coins)
             cursor = db.cursor()
             cursor.execute(sql)
             button_id = 0
