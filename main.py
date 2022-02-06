@@ -163,7 +163,8 @@ def callback(call):
             print('choose_reward')
             user_coins = get_coins(call.message.chat.id)
             db = sqlite3.connect("bot_database.db")
-            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={} AND reward_cost<={}".format(call.message.chat.id, user_coins)
+            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={} AND reward_cost<={}".format(
+                call.message.chat.id, user_coins)
             cursor = db.cursor()
             cursor.execute(sql)
             button_id = 0
@@ -173,7 +174,14 @@ def callback(call):
                 markup.add(telebot.types.InlineKeyboardButton(f'{i} - {j} coins', callback_data=f'button {button_id}'))
                 reward_list.dict_rewards[f'button {button_id}'] = j
             markup.add(telebot.types.InlineKeyboardButton('Назад', callback_data='back_to_menu'))
-            bot.send_message(call.message.chat.id, 'Список наград', reply_markup=markup)
+            sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(
+                call.message.chat.id)
+            cursor = db.cursor()
+            cursor.execute(sql)
+            all_rewards_list = ''
+            for i, j in cursor.fetchall():
+                all_rewards_list += f'{i} - {j} coins\n'
+            bot.send_message(call.message.chat.id, 'Список наград:\n'+all_rewards_list, reply_markup=markup)
         elif call.data == 'del_reward':
             db = sqlite3.connect("bot_database.db")
             sql = "SELECT reward_name, reward_cost FROM rewards WHERE user_id={}".format(call.message.chat.id)
